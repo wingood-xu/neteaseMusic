@@ -6,14 +6,13 @@ import time
 
 class NeteaseMusic(object):
     def __init__(self):
-        self.url = 'http://music.163.com/discover/playlist/?order=hot&cat={}&limit=35&offset={}'
+        self.url = 'http://music.163.com/playlist?id=924680166'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
         }
         self.proxies = {}
 
         self.index_f = open('player_list.json', 'w', encoding='utf-8')
-        self.get_proxy()
 
     def get_proxy(self):
         proxy = requests.get('http://127.0.0.1:5000/get')
@@ -27,11 +26,11 @@ class NeteaseMusic(object):
         获取网易云首页专辑数据
         :return: 
         """
-        # is_ok = self.get_proxy()
-        # if is_ok != 200:  # 获取代理,如果代理获取失败,则重新获取
-        #     self.get_index(url)
+        is_ok = self.get_proxy()
+        if is_ok != 200:  # 获取代理,如果代理获取失败,则重新获取
+            self.get_index(url)
         try:  # 如果请求超时,换代理重新请求
-            response = requests.get(url, headers=self.headers,proxies=self.proxies, timeout=5)
+            response = requests.get(url, headers=self.headers,timeout=5)
             print(response.status_code)
             if response.status_code != 200:
                 self.get_index(url)
@@ -47,16 +46,18 @@ class NeteaseMusic(object):
 
     def parse_index(self, html):
         print(type(html))
-        html = etree.HTML(html.decode())
-        player_list = html.xpath('//*[@id="m-pl-container"]/li/div[@class="u-cover u-cover-1"]')
+        html = etree.HTML(html)
+        player_list = html.xpath('//div[@id="song-list-pre-cache"]/ul/li')
+        print(player_list)
         results = []
         for player in player_list:
-            result = {}
-            result['title'] = player.xpath('./a/@title')[0]
-            result['href'] = 'http://music.163.com/#' + player.xpath('./a/@href')[0]
-            result['count'] = player.xpath('./div/*[@class="nb"]/text()')[0]
-            results.append(result)
-            self.index_save(result)
+            print(player.xpath('./a/text()'))
+            # result = {}
+            # result['title'] = player.xpath('./a/@title')[0]
+            # result['href'] = 'http://music.163.com/#' + player.xpath('./a/@href')[0]
+            # result['count'] = player.xpath('./div/*[@class="nb"]/text()')[0]
+            # results.append(result)
+            # self.index_save(result)
 
         return results
 
@@ -75,14 +76,14 @@ class NeteaseMusic(object):
         pass
 
     def run(self):
-        for i in range(38):
-            url = self.url.format('全部',35*i)
-            r = self.get_index(url)
-            print(r)
+        # for i in range(38):
+        #     url = self.url.format('全部',35*i)
+            r = self.get_index(self.url)
+            # print(r.decode())
             # while 1:
             #     try:
             # print('again')
-            self.parse_index(r)
+            self.parse_index(r.decode())
             # time.sleep(1)
 
         #     break
