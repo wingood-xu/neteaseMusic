@@ -6,7 +6,7 @@ import time
 
 class NeteaseMusic(object):
     def __init__(self):
-        self.url = 'http://music.163.com/playlist?id=924680166'
+        self.url = 'http://music.163.com/playlist?id=965419799'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
         }
@@ -15,7 +15,7 @@ class NeteaseMusic(object):
         self.index_f = open('player_list.json', 'w', encoding='utf-8')
 
     def get_proxy(self):
-        proxy = requests.get('http://127.0.0.1:5000/get')
+        proxy = requests.get('http://127.0.0.1:5010/get')
         self.proxies['http'] = 'http:{}'.format(proxy.text)
         self.proxies['https'] = 'https:{}'.format(proxy.text)
         print(self.proxies)
@@ -31,7 +31,7 @@ class NeteaseMusic(object):
             self.get_index(url)
         try:  # 如果请求超时,换代理重新请求
             response = requests.get(url, headers=self.headers,timeout=5)
-            print(response.status_code)
+            # print(response.status_code)
             if response.status_code != 200:
                 self.get_index(url)
             else:
@@ -40,15 +40,16 @@ class NeteaseMusic(object):
                 # print(etree.HTML(html))
                 # data = etree.HTML(html)
                 # print(data,11111111)
+                print(html.decode())
                 return html
         except:
             self.get_index(url)
 
     def parse_index(self, html):
-        print(type(html))
+        # print(type(html))
         html = etree.HTML(html)
         player_list = html.xpath('//div[@id="song-list-pre-cache"]/ul/li')
-        print(player_list)
+        # print(player_list)
         results = []
         for player in player_list:
             print(player.xpath('./a/text()'))
